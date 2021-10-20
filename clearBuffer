@@ -1,0 +1,35 @@
+::仅支持同时连接一台设备
+
+::关闭回显
+@echo off
+:: 窗体标题
+title 清楚apk缓存
+:start
+:: echo= 输出空白行
+echo=
+:: 命令结果对变量赋值
+for /f %%i in ('adb devices') do set dev=%%i
+:: 判断是否连接设备，注意字符串的比较
+if "%dev%" == "List" (
+	echo=
+	echo 未检测到设备，请确认设备连接情况
+	:: 跳转指令，无设备则跳过清楚缓存
+	goto stop
+) else echo 当前连接的设备：
+:: 打印设备厂商名
+adb -d shell getprop ro.product.brand
+::判断手机是否已安装ease
+set installed=
+for /f %%j in ('adb shell pm list packages ^| findstr cn.calm.ease') do set installed=%%j
+if "%installed%" =="" (
+	echo=
+	echo 未安装ease
+	goto stop
+)else echo=
+echo ================ 开始清除缓存 ==============
+::清楚ease缓存
+adb shell pm clear cn.calm.ease
+:stop
+pause
+:: 跳转指令，重新检测设备并进行清楚缓存
+goto start
